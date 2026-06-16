@@ -36,18 +36,18 @@ public class UserService {
         return userRepository.save(user);
     }
     
- // メールアドレスが登録済みかどうかをチェックする
+	// メールアドレスが登録済みかどうかをチェックする
     public boolean isEmailRegistered(String email) {
         User user = userRepository.findByEmail(email);
         return user != null;
     }
     
- // パスワードとパスワード（確認用）の入力値が一致するかどうかをチェックする
+    // パスワードとパスワード（確認用）の入力値が一致するかどうかをチェックする
     public boolean isSamePassword(String password, String passwordConfirmation) {
         return password.equals(passwordConfirmation);
     }
     
- // ユーザーを有効にする
+    // ユーザーを有効にする
     @Transactional
     public void enableUser(User user) {
         user.setEnabled(true);
