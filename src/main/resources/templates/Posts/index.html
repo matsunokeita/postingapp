@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html xmlns:th="https://www.thymeleaf.org">
+   <head>
+       <meta charset="UTF-8">
+       <meta name="viewport" content="width=device-width, initial-scale=1">
+       <title>投稿一覧</title>
+   </head>
+   <body>
+       <header>
+           <nav>
+               <a th:href="@{/}">投稿アプリ</a>
+
+               <ul>
+                   <li>
+                       <a th:href="@{/logout}" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
+                           ログアウト
+                       </a>
+                       <form id="logout-form" th:action="@{/logout}" method="post"></form>
+                   </li>
+               </ul>
+           </nav>
+       </header>
+
+       <main>
+           <h1>投稿一覧</h1>
+           
+           <div th:if="${param.loggedIn}">
+               <p>ログインしました。</p>
+           </div>            
+
+           <div th:unless="${#lists.isEmpty(posts)}">
+               <article th:each="post : ${posts}">
+                   <h2 th:text="${post.title}"></h2>
+                   <p th:text="${post.content}"></p>                        
+               </article>
+           </div>
+           <div th:if="${#lists.isEmpty(posts)}">
+               <p>投稿はありません。</p>
+           </div>
+       </main>
+
+       <footer>
+           <p>&copy; 投稿アプリ All rights reserved.</p>
+       </footer>
+   </body>
+</html>
