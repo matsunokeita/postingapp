@@ -7,7 +7,6 @@ import com.example.postingapp.entity.User;
 import lombok.Getter;
 
 @Getter
-
 public class SignupEvent extends ApplicationEvent {
     private User user;
     private String requestUrl;
