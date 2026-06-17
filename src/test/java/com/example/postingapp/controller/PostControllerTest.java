@@ -10,6 +10,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.RequestBuilder;
+import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.transaction.annotation.Transactional;
 
 @SpringBootTest
@@ -49,6 +51,21 @@ public class PostControllerTest {
     @Test
     public void 未ログインの場合は投稿詳細ページからログインページにリダイレクトする() throws Exception {
         mockMvc.perform(get("/posts/1"))
+               .andExpect(status().is3xxRedirection())
+               .andExpect(redirectedUrl("/login"));
+    }
+    
+    @Test
+    public void ログイン済みの場合は投稿作成ページが正しく表示される() throws Exception {
+        var userDetails = userDetailsService.loadUserByUsername("taro.samurai@example.com");
+        mockMvc.perform(get("/posts/register").with(user(userDetails)))
+               .andExpect(status().isOk())
+               .andExpect(view().name("posts/register"));
+    }
+
+    @Test
+    public void 未ログインの場合は投稿作成ページからログインページにリダイレクトする() throws Exception {
+        mockMvc.perform(get("/posts/register"))
                .andExpect(status().is3xxRedirection())
                .andExpect(redirectedUrl("/login"));
     }

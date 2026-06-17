@@ -13,6 +13,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.example.postingapp.entity.Post;
 import com.example.postingapp.entity.User;
+import com.example.postingapp.form.PostRegisterForm;
 import com.example.postingapp.security.UserDetailsImpl;
 import com.example.postingapp.service.PostService;
 
@@ -49,6 +50,13 @@ public class PostController {
     	model.addAttribute("post", post);
     	
     	return "posts/show";
+    }
+    
+    @GetMapping("/register")
+    public String register(Model model) {
+        model.addAttribute("postRegisterForm", new PostRegisterForm());
+
+        return "posts/register";
     }
     
 }
