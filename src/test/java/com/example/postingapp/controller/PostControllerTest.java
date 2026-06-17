@@ -25,8 +25,7 @@ public class PostControllerTest {
 
     @Test
     public void ログイン済みの場合は投稿一覧ページが正しく表示される() throws Exception {
-        org.springframework.security.core.userdetails.UserDetails userDetails = 
-            userDetailsService.loadUserByUsername("taro.samurai@example.com");
+        var userDetails = userDetailsService.loadUserByUsername("taro.samurai@example.com");
         mockMvc.perform(get("/posts").with(user(userDetails)))
                .andExpect(status().isOk())
                .andExpect(view().name("posts/index"));
@@ -35,6 +34,21 @@ public class PostControllerTest {
     @Test
     public void 未ログインの場合は投稿一覧ページからログインページにリダイレクトする() throws Exception {
         mockMvc.perform(get("/posts"))
+               .andExpect(status().is3xxRedirection())
+               .andExpect(redirectedUrl("/login"));
+    }
+
+    @Test
+    public void ログイン済みの場合は投稿詳細ページが正しく表示される() throws Exception {
+        var userDetails = userDetailsService.loadUserByUsername("taro.samurai@example.com");
+        mockMvc.perform(get("/posts/1").with(user(userDetails)))
+               .andExpect(status().isOk())
+               .andExpect(view().name("posts/show"));
+    }
+
+    @Test
+    public void 未ログインの場合は投稿詳細ページからログインページにリダイレクトする() throws Exception {
+        mockMvc.perform(get("/posts/1"))
                .andExpect(status().is3xxRedirection())
                .andExpect(redirectedUrl("/login"));
     }
