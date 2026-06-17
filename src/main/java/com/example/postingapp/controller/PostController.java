@@ -6,8 +6,12 @@ import java.util.Optional;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
@@ -24,6 +28,27 @@ public class PostController {
 
     public PostController(PostService postService) {
         this.postService = postService;
+    }
+    
+    @PostMapping("/create")
+    public String create(@ModelAttribute @Validated PostRegisterForm postRegisterForm,
+                         BindingResult bindingResult,
+                         @AuthenticationPrincipal UserDetailsImpl userDetailsImpl,
+                         RedirectAttributes redirectAttributes,
+                         Model model)
+    {
+        if (bindingResult.hasErrors()) {
+            model.addAttribute("postRegisterForm", postRegisterForm);
+
+            return "posts/register";
+        }
+
+        User user = userDetailsImpl.getUser();
+
+        postService.createPost(postRegisterForm, user);
+        redirectAttributes.addFlashAttribute("successMessage", "投稿が完了しました。");
+
+        return "redirect:/posts";
     }
 
     @GetMapping

@@ -9,4 +9,5 @@ import com.example.postingapp.entity.User;
 
 public interface PostRepository extends JpaRepository<Post, Integer> {
     public List<Post> findByUserOrderByCreatedAtDesc(User user);
+    public Post findFirstByOrderByIdDesc();
 }

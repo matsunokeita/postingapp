@@ -28,6 +28,10 @@
                <p>ログインしました。</p>
            </div>
 		   
+		   <div th:if="${successMessage}">
+		       <p th:text="${successMessage}"></p>
+	       </div>
+		   
 		   <div th:if="${errorMessage}">
 		       <p th:text="${errorMessage}"></p>
 		   </div>          
