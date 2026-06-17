@@ -1,6 +1,7 @@
 package com.example.postingapp.service;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.stereotype.Service;
 
@@ -20,4 +21,15 @@ public class PostService {
     public List<Post> findPostsByUserOrderedByCreatedAtDesc(User user) {
         return postRepository.findByUserOrderByCreatedAtDesc(user);
     }
+    
+    
+    // 指定したidを持つ投稿を所得する
+    public Optional<Post> findPostId(Integer id) {
+    	return postRepository.findById(id);
+    }
+
+	public Optional<Post> findPostById(Integer id) {
+		// TODO 自動生成されたメソッド・スタブ
+		return postRepository.findById(id);
+	}
 }
