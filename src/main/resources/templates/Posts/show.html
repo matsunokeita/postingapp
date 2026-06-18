@@ -23,6 +23,10 @@
 
        <main>
            <h1>投稿詳細</h1>
+		   
+		   <div th:if="${successMessage}">
+               <p th:text="${successMessage}"></p>
+           </div>
 
            <a th:href="@{/posts}">&lt; 戻る</a>
 
@@ -32,7 +36,11 @@
 			   
 			   <div th:if="${#authentication.principal.user.id == post.user.id}">
 	               <a th:href="@{/posts/__${post.id}__/edit}">編集</a>
-	           </div>
+	           
+				   <form th:action="@{/posts/__${post.id}__/delete}" method="post" onsubmit="return confirm('本当に削除してもよろしいですか？');">
+                       <button type="submit">削除</button>
+                   </form> 
+			   </div>
            </article>
        </main>
 

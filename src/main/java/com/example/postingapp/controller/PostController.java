@@ -105,4 +105,58 @@ public class PostController {
         return "posts/edit";
     }
     
+    @PostMapping("/{id}/update")
+    public String update(@ModelAttribute @Validated PostEditForm postEditForm,
+                         BindingResult bindingResult,
+                         @PathVariable(name = "id") Integer id,
+                         @AuthenticationPrincipal UserDetailsImpl userDetailsImpl,
+                         RedirectAttributes redirectAttributes,
+                         Model model)
+    {
+        Optional<Post> optionalPost = postService.findPostById(id);
+        User user = userDetailsImpl.getUser();
+
+        if (optionalPost.isEmpty() || !optionalPost.get().getUser().equals(user)) {
+            redirectAttributes.addFlashAttribute("errorMessage", "不正なアクセスです。");
+
+            return "redirect:/posts";
+        }
+
+        Post post = optionalPost.get();
+
+        if (bindingResult.hasErrors()) {
+            model.addAttribute("post", post);
+            model.addAttribute("postEditForm", postEditForm);
+
+            return "posts/edit";
+        }
+
+        postService.updatePost(postEditForm, post);
+        redirectAttributes.addFlashAttribute("successMessage", "投稿を編集しました。");
+
+        return "redirect:/posts/" + id;
+    }
+    
+    @PostMapping("/{id}/delete")
+    public String delete(@PathVariable(name = "id") Integer id,
+                         @AuthenticationPrincipal UserDetailsImpl userDetailsImpl,
+                         RedirectAttributes redirectAttributes,
+                         Model model)
+    {
+        Optional<Post> optionalPost = postService.findPostById(id);
+        User user = userDetailsImpl.getUser();
+
+        if (optionalPost.isEmpty() || !optionalPost.get().getUser().equals(user)) {
+            redirectAttributes.addFlashAttribute("errorMessage", "不正なアクセスです。");
+
+            return "redirect:/posts";
+        }
+
+        Post post = optionalPost.get();
+        postService.deletePost(post);
+        redirectAttributes.addFlashAttribute("successMessage", "投稿を削除しました。");
+
+        return "redirect:/posts";
+    }
+    
 }

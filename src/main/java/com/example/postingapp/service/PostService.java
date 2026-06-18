@@ -8,6 +8,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.example.postingapp.entity.Post;
 import com.example.postingapp.entity.User;
+import com.example.postingapp.form.PostEditForm;
 import com.example.postingapp.form.PostRegisterForm;
 import com.example.postingapp.repository.PostRepository;
 
@@ -49,5 +50,18 @@ public class PostService {
         post.setUser(user);
 
         postRepository.save(post);
+    }
+	
+	@Transactional
+    public void updatePost(PostEditForm postEditForm, Post post) {
+        post.setTitle(postEditForm.getTitle());
+        post.setContent(postEditForm.getContent());
+
+        postRepository.save(post);
+    }
+	
+	@Transactional
+    public void deletePost(Post post) {
+        postRepository.delete(post);
     }
 }

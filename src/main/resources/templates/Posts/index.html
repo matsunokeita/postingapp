@@ -44,7 +44,11 @@
                    <p th:text="${post.content}"></p>
 				   
 				   <a th:href="@{/posts/__${post.id}__}">詳細</a>  
-				   <a th:href="@{/posts/__${post.id}__/edit}">編集</a>                      
+				   <a th:href="@{/posts/__${post.id}__/edit}">編集</a>
+				   
+				   <form th:action="@{/posts/__${post.id}__/delete}" method="post" onsubmit="return confirm('本当に削除してもよろしいですか？');">
+	                   <button type="submit">削除</button>
+	               </form>                      
                </article>
            </div>
            <div th:if="${#lists.isEmpty(posts)}">
