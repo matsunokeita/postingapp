@@ -1,79 +1,92 @@
 <!DOCTYPE html>
 <html xmlns:th="https://www.thymeleaf.org">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
 
-        <!-- Bootstrap -->
-        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
 
-		<!-- Google Fonts -->
-        <link rel="preconnect" href="https://fonts.googleapis.com">
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-        <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500&display=swap" rel="stylesheet"> 
-		
-		<!-- CSSファイル -->
-        <link th:href="@{/css/style.css}" rel="stylesheet" >
-		
-		<title>投稿編集</title>
-    </head>
-    <body>
-        <header>
-            <nav class="navbar navbar-expand-md navbar-light bg-light">
-                <div class="container">
-                    <a th:href="@{/}" class="navbar-brand">投稿アプリ</a>
+	<!-- Bootstrap -->
+	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"
+		integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">
 
-                    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-                        <span class="navbar-toggler-icon"></span>
-                    </button>
+	<!-- Google Fonts -->
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500&display=swap" rel="stylesheet">
 
-                    <div class="collapse navbar-collapse" id="navbarNav">
-                        <ul class="navbar-nav ms-auto">
-                            <li class="nav-item">
-                                <a th:href="@{/logout}" class="nav-link" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
-                                    ログアウト
-                                </a>
-                                <form id="logout-form" th:action="@{/logout}" method="post"></form>
-                            </li>
-                        </ul>
-                    </div>
-                </div>
-            </nav>
-        </header>
+	<!-- CSSファイル -->
+	<link th:href="@{/css/style.css}" rel="stylesheet">
 
-        <main>
-            <div class="container">
-                <h1 class="fs-2 my-3">投稿編集</h1>
+	<title>投稿編集</title>
+</head>
 
-                <div class="mb-2">
-                    <a th:href="@{/posts}" class="text-decoration-none">&lt; 戻る</a>
-                </div>
+<body>
+	<div class="wrapper">
+		<header>
+			<nav class="navbar navbar-expand-md navbar-light bg-light">
+				<div class="container">
+					<a th:href="@{/}" class="navbar-brand">投稿アプリ</a>
 
-                <form th:action="@{/posts/__${post.id}__/update}" method="post" th:object="${postEditForm}">
-                    <div class="form-group mb-3">
-                        <label for="title">タイトル</label>
-                        <div th:if="${#fields.hasErrors('title')}" class="text-danger small mb-2" th:errors="*{title}"></div>
-                        <input type="text" class="form-control" th:field="*{title}">
-                    </div>
+					<button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+						aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+						<span class="navbar-toggler-icon"></span>
+					</button>
 
-                    <div class="form-group mb-3">
-                        <label for="content">本文</label>
-                        <div th:if="${#fields.hasErrors('content')}" class="text-danger small mb-2" th:errors="*{content}"></div>
-                        <textarea class="form-control" th:field="*{content}"></textarea>
-                    </div>
+					<div class="collapse navbar-collapse" id="navbarNav">
+						<ul class="navbar-nav ms-auto">
+							<li class="nav-item">
+								<a th:href="@{/logout}" class="nav-link"
+									onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
+									ログアウト
+								</a>
+								<form id="logout-form" th:action="@{/logout}" method="post"></form>
+							</li>
+						</ul>
+					</div>
+				</div>
+			</nav>
+		</header>
 
-                    <div>
-                        <button type="submit" class="btn btn-outline-primary">更新</button>
-                    </div>
-                </form>
-            </div>
-        </main>
+		<main>
+			<div class="container">
+				<h1 class="fs-2 my-3">投稿編集</h1>
 
-        <footer class="d-flex justify-content-center align-items-center bg-light">
-            <p class="text-muted small mb-0">&copy; 投稿アプリ All rights reserved.</p>
-        </footer>
+				<div class="mb-2">
+					<a th:href="@{/posts}" class="text-decoration-none">&lt; 戻る</a>
+				</div>
 
-        <!-- Bootstrap -->
-        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js" integrity="sha384-geWF76RCwLtnZ8qwWowPQNguL3RmwHVBC9FhGdlKrxdiJJigb/j/68SIy3Te4Bkz" crossorigin="anonymous"></script>
-    </body>
+				<form th:action="@{/posts/__${post.id}__/update}" method="post" th:object="${postEditForm}">
+					<div class="form-group mb-3">
+						<label for="title">タイトル</label>
+						<div th:if="${#fields.hasErrors('title')}" class="text-danger small mb-2" th:errors="*{title}">
+						</div>
+						<input type="text" class="form-control" th:field="*{title}">
+					</div>
+
+					<div class="form-group mb-3">
+						<label for="content">本文</label>
+						<div th:if="${#fields.hasErrors('content')}" class="text-danger small mb-2"
+							th:errors="*{content}">
+						</div>
+						<textarea class="form-control" th:field="*{content}"></textarea>
+					</div>
+
+					<div>
+						<button type="submit" class="btn btn-outline-primary">更新</button>
+					</div>
+				</form>
+			</div>
+		</main>
+
+		<footer class="d-flex justify-content-center align-items-center bg-light">
+			<p class="text-muted small mb-0">&copy; 投稿アプリ All rights reserved.</p>
+		</footer>
+	</div>
+
+	<!-- Bootstrap -->
+	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"
+		integrity="sha384-geWF76RCwLtnZ8qwWowPQNguL3RmwHVBC9FhGdlKrxdiJJigb/j/68SIy3Te4Bkz"
+		crossorigin="anonymous"></script>
+</body>
+
 </html>
