@@ -37,8 +37,7 @@
 							<div class="card-body">
 								<h2 class="card-title fs-5" th:text="${post.title}"></h2>
 								<p class="card-text" th:text="${post.content}"></p>
-								<p class="card-text text-muted small" th:text="'更新日時：' + ${#temporals.format(post.updatedAtJst, 'yyyy/MM/dd HH:mm')}"></p>
-
+								<p class="card-text text-muted small" th:text="'更新日時：' + ${#dates.format(post.updatedAt, 'yyyy/MM/dd HH:mm')}"></p>
 								<div class="d-flex">
 									<a th:href="@{/posts/__${post.id}__}"
 										class="btn btn-outline-primary d-block me-1">詳細</a>
