@@ -16,20 +16,19 @@ public class WebSecurityConfig {
   @Bean
   public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
       http
-          .authorizeHttpRequests((requests) -> requests                
-              .requestMatchers("/css/**", "/signup/**").permitAll()  // すべてのユーザーにアクセスを許可するURL
-              .anyRequest().authenticated()  // 上記以外のURLはログインが必要
+          .authorizeHttpRequests((requests) -> requests
+              .requestMatchers("/css/**", "/signup/**").permitAll()
+              .anyRequest().authenticated()
           )
           .formLogin((form) -> form
-              .loginPage("/login")              // ログインページのURL
-              .loginProcessingUrl("/login")     // ログインフォームの送信先URL
-              .defaultSuccessUrl("/?loggedIn")  // ログイン成功時のリダイレクト先URL
-              .defaultSuccessUrl("/posts?loggedIn")  // ログイン成功時のリダイレクト先URL
-              .failureUrl("/login?error")       // ログイン失敗時のリダイレクト先URL
+              .loginPage("/login")
+              .loginProcessingUrl("/login")
+              .defaultSuccessUrl("/posts?loggedIn", true)
+              .failureUrl("/login?error")
               .permitAll()
           )
-          .logout((logout) -> logout                
-              .logoutSuccessUrl("/login?loggedOut")  // ログアウト時のリダイレクト先URL
+          .logout((logout) -> logout
+              .logoutSuccessUrl("/login?loggedOut")
               .permitAll()
           );
 
