@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html xmlns:th="https://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
+<head>
+	<div th:replace="~{fragment :: meta}"></div>
+
+	<div th:replace="~{fragment :: styles}"></div>
+
+	<title>投稿詳細</title>
+</head>
+
+<body>
+	<div class="wrapper">
+		<div th:replace="~{fragment :: header}"></div>
+
+		<main>
+			<div class="container">
+				<h1 class="fs-2 my-3">投稿詳細</h1>
+
+				<div th:if="${successMessage}">
+					<p class="text-success" th:text="${successMessage}"></p>
+				</div>
+
+				<div class="mb-2">
+					<a th:href="@{/posts}" class="text-decoration-none">&lt; 戻る</a>
+				</div>
+
+				<article>
+					<div class="card mb-3">
+						<div class="card-body">
+							<h2 class="card-title fs-5" th:text="${post.title}"></h2>
+							<p class="card-text" th:text="${post.content}"></p>
+
+							<div th:if="${#authentication.principal.user.id == post.user.id}" class="d-flex">
+								<a th:href="@{/posts/__${post.id}__/edit}"
+									class="btn btn-outline-primary d-block me-1">編集</a>
+
+								<form th:action="@{/posts/__${post.id}__/delete}" method="post"
+									onsubmit="return confirm('本当に削除してもよろしいですか？');">
+									<button type="submit" class="btn btn-outline-danger">削除</button>
+								</form>
+							</div>
+						</div>
+					</div>
+				</article>
+			</div>
+		</main>
+
+		<div th:replace="~{fragment :: footer}"></div>
+	</div>
+
+	<div th:replace="~{fragment :: scripts}"></div>
+</body>
+
+</html>
