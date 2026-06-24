@@ -1,1 +1,1 @@
-web: java -Dserver.port=$PORT $JAVA_OPTS -jar -Dspring.profiles.active=production target/*.jar
+web: java -Dserver.port=$PORT $JAVA_OPTS -Duser.timezone=Asia/Tokyo -jar -Dspring.profiles.active=production target/*.jar
