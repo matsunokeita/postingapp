@@ -72,7 +72,7 @@ public class PostService {
 			try {
 				String publicId = extractPublicId(post.getFileUrl());
 				cloudinary.uploader().destroy(publicId, Map.of());
-			} catch (IOException e) {
+			} catch (Exception e) {
 				// 削除失敗してもDB削除は続行
 			}
 		}
@@ -92,9 +92,15 @@ public class PostService {
 			}
 			String publicId = "postingapp/" + UUID.randomUUID() + extension;
 
+			String originalName = file.getOriginalFilename() != null ? file.getOriginalFilename().toLowerCase() : "";
+			boolean isImage = originalName.endsWith(".jpg") || originalName.endsWith(".jpeg")
+					|| originalName.endsWith(".png") || originalName.endsWith(".gif")
+					|| originalName.endsWith(".webp");
+			String resourceType = isImage ? "image" : "raw";
+
 			Map<String, Object> uploadParams = new java.util.HashMap<>();
 			uploadParams.put("public_id", publicId);
-			uploadParams.put("resource_type", "image");
+			uploadParams.put("resource_type", resourceType);
 
 			Map uploadResult = cloudinary.uploader().upload(
 					file.getBytes(),
@@ -106,6 +112,7 @@ public class PostService {
 			post.setFileName(originalFilename);
 
 		} catch (IOException e) {
+			e.printStackTrace();
 			throw new RuntimeException("ファイルのアップロードに失敗しました。", e);
 		}
 	}
@@ -121,9 +128,5 @@ public class PostService {
 			afterUpload = afterUpload.substring(0, dotIndex);
 		}
 		return afterUpload;
-	}
-
-	public String getCloudinaryCredentials() {
-		return cloudinary.config.apiKey + ":" + cloudinary.config.apiSecret;
 	}
 }
