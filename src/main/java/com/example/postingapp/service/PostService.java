@@ -88,7 +88,11 @@ public class PostService {
 
 		try {
 			String originalFilename = file.getOriginalFilename();
-			String publicId = "postingapp/" + UUID.randomUUID();
+			String extension = "";
+			if (originalFilename != null && originalFilename.contains(".")) {
+				extension = originalFilename.substring(originalFilename.lastIndexOf("."));
+			}
+			String publicId = "postingapp/" + UUID.randomUUID() + extension;
 
 			String originalName = file.getOriginalFilename() != null ? file.getOriginalFilename().toLowerCase() : "";
 			boolean isImage = originalName.endsWith(".jpg") || originalName.endsWith(".jpeg")
