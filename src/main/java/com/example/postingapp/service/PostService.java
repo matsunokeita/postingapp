@@ -101,12 +101,14 @@ public class PostService {
 
 			String resourceType = isImage ? "image" : "raw";
 
+			Map<String, Object> uploadParams = new java.util.HashMap<>();
+			uploadParams.put("public_id", publicId);
+			uploadParams.put("resource_type", resourceType);
+			uploadParams.put("access_mode", "public");
+
 			Map uploadResult = cloudinary.uploader().upload(
 					file.getBytes(),
-					Map.of(
-							"public_id", publicId,
-							"resource_type", resourceType));
-
+					uploadParams);
 			String secureUrl = (String) uploadResult.get("secure_url");
 
 			post.setFileUrl(secureUrl);
