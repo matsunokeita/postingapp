@@ -50,7 +50,9 @@
 
 								<!-- ダウンロードリンク -->
 								<a th:href="${post.fileUrl}" th:text="${post.fileName}"
-									target="_blank" class="btn btn-outline-secondary btn-sm">
+								    target="_blank" class="btn btn-outline-secondary btn-sm"
+								    th:download="${post.fileName}">
+								</a>
 								</a>
 							</div>
 

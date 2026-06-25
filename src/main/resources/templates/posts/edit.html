@@ -57,7 +57,8 @@
 						</div>
 
 						<a th:href="${post.fileUrl}" th:text="${post.fileName}"
-							target="_blank" class="btn btn-outline-secondary btn-sm mb-2">
+							target="_blank" class="btn btn-outline-secondary btn-sm mb-2"
+							th:download="${post.fileName}">
 						</a>
 					</div>
 
