@@ -20,143 +20,106 @@ import com.example.postingapp.repository.PostRepository;
 @Service
 public class PostService {
 
-	private final PostRepository postRepository;
-	private final Cloudinary cloudinary;
+    private final PostRepository postRepository;
+    private final Cloudinary cloudinary;
 
-	public PostService(PostRepository postRepository, Cloudinary cloudinary) {
-		this.postRepository = postRepository;
-		this.cloudinary = cloudinary;
-	}
+    public PostService(PostRepository postRepository, Cloudinary cloudinary) {
+        this.postRepository = postRepository;
+        this.cloudinary = cloudinary;
+    }
 
-	public List<Post> findPostsByUserOrderedByUpdatedAtAsc(User user) {
-		return postRepository.findByUserOrderByUpdatedAtAsc(user);
-	}
+    public List<Post> findPostsByUserOrderedByUpdatedAtAsc(User user) {
+        return postRepository.findByUserOrderByUpdatedAtAsc(user);
+    }
 
-	public Optional<Post> findPostId(Integer id) {
-		return postRepository.findById(id);
-	}
+    public Optional<Post> findPostId(Integer id) {
+        return postRepository.findById(id);
+    }
 
-	public Post findFirstPostByOrderByIdDesc() {
-		return postRepository.findFirstByOrderByIdDesc();
-	}
+    public Post findFirstPostByOrderByIdDesc() {
+        return postRepository.findFirstByOrderByIdDesc();
+    }
 
-	public Optional<Post> findPostById(Integer id) {
-		return postRepository.findById(id);
-	}
+    public Optional<Post> findPostById(Integer id) {
+        return postRepository.findById(id);
+    }
 
-	@Transactional
-	public void createPost(PostRegisterForm postRegisterForm, User user) {
-		Post post = new Post();
-		post.setTitle(postRegisterForm.getTitle());
-		post.setContent(postRegisterForm.getContent());
-		post.setUser(user);
+    @Transactional
+    public void createPost(PostRegisterForm postRegisterForm, User user) {
+        Post post = new Post();
+        post.setTitle(postRegisterForm.getTitle());
+        post.setContent(postRegisterForm.getContent());
+        post.setUser(user);
 
-		uploadFile(postRegisterForm.getAttachedFile(), post);
+        uploadFile(postRegisterForm.getAttachedFile(), post);
 
-		postRepository.save(post);
-	}
+        postRepository.save(post);
+    }
 
-	@Transactional
-	public void updatePost(PostEditForm postEditForm, Post post) {
-		post.setTitle(postEditForm.getTitle());
-		post.setContent(postEditForm.getContent());
+    @Transactional
+    public void updatePost(PostEditForm postEditForm, Post post) {
+        post.setTitle(postEditForm.getTitle());
+        post.setContent(postEditForm.getContent());
 
-		uploadFile(postEditForm.getAttachedFile(), post);
+        uploadFile(postEditForm.getAttachedFile(), post);
 
-		postRepository.save(post);
-	}
+        postRepository.save(post);
+    }
 
-	@Transactional
-	public void deletePost(Post post) {
-		// Cloudinaryのファイルも削除
-		if (post.getFileUrl() != null) {
-			try {
-				String publicId = extractPublicId(post.getFileUrl());
-				cloudinary.uploader().destroy(publicId, Map.of());
-			} catch (IOException e) {
-				// 削除失敗してもDB削除は続行
-			}
-		}
-		postRepository.delete(post);
-	}
+    @Transactional
+    public void deletePost(Post post) {
+        if (post.getFileUrl() != null) {
+            try {
+                String publicId = extractPublicId(post.getFileUrl());
+                cloudinary.uploader().destroy(publicId, Map.of());
+            } catch (IOException e) {
+                // 削除失敗してもDB削除は続行
+            }
+        }
+        postRepository.delete(post);
+    }
 
-	// ファイルアップロード共通処理
-	private void uploadFile(MultipartFile file, Post post) {
-		if (file == null || file.isEmpty()) {
-			return;
-		}
+    private void uploadFile(MultipartFile file, Post post) {
+        if (file == null || file.isEmpty()) {
+            return;
+        }
 
-		try {
-			String originalFilename = file.getOriginalFilename();
-			String extension = "";
-			if (originalFilename != null && originalFilename.contains(".")) {
-				extension = originalFilename.substring(originalFilename.lastIndexOf("."));
-			}
-			String publicId = "postingapp/" + UUID.randomUUID() + extension;
+        try {
+            String originalFilename = file.getOriginalFilename();
+            String extension = "";
+            if (originalFilename != null && originalFilename.contains(".")) {
+                extension = originalFilename.substring(originalFilename.lastIndexOf("."));
+            }
+            String publicId = "postingapp/" + UUID.randomUUID() + extension;
 
-			String originalName = file.getOriginalFilename() != null ? file.getOriginalFilename().toLowerCase() : "";
-			boolean isImage = originalName.endsWith(".jpg") || originalName.endsWith(".jpeg")
-					|| originalName.endsWith(".png") || originalName.endsWith(".gif")
-					|| originalName.endsWith(".webp");
+            Map<String, Object> uploadParams = new java.util.HashMap<>();
+            uploadParams.put("public_id", publicId);
+            uploadParams.put("resource_type", "image");
 
-			String resourceType = isImage ? "image" : "raw";
+            Map uploadResult = cloudinary.uploader().upload(
+                    file.getBytes(),
+                    uploadParams);
 
-			Map<String, Object> uploadParams = new java.util.HashMap<>();
-			uploadParams.put("public_id", publicId);
-			uploadParams.put("resource_type", resourceType);
-			uploadParams.put("access_mode", "public");
+            String secureUrl = (String) uploadResult.get("secure_url");
 
-			Map uploadResult = cloudinary.uploader().upload(
-					file.getBytes(),
-					uploadParams);
-			String secureUrl = (String) uploadResult.get("secure_url");
+            post.setFileUrl(secureUrl);
+            post.setFileName(originalFilename);
 
-			post.setFileUrl(secureUrl);
-			post.setFileName(originalFilename);
+        } catch (IOException e) {
+            throw new RuntimeException("ファイルのアップロードに失敗しました。", e);
+        }
+    }
 
-		} catch (IOException e) {
-			throw new RuntimeException("ファイルのアップロードに失敗しました。", e);
-		}
-	}
-
-	// CloudinaryのURLからpublic_idを取得
-	private String extractPublicId(String fileUrl) {
-		// 例: https://res.cloudinary.com/xxx/image/upload/v123/postingapp/uuid
-		String[] parts = fileUrl.split("/upload/");
-		String afterUpload = parts[1];
-		// バージョン番号(v123/)を除去
-		if (afterUpload.startsWith("v")) {
-			afterUpload = afterUpload.substring(afterUpload.indexOf("/") + 1);
-		}
-		// 拡張子を除去
-		int dotIndex = afterUpload.lastIndexOf(".");
-		if (dotIndex != -1) {
-			afterUpload = afterUpload.substring(0, dotIndex);
-		}
-		return afterUpload;
-	}
-	
-	public String generateSignedUrl(String fileUrl) {
-	    try {
-	        // public_idを取得
-	        String publicId = extractPublicId(fileUrl);
-	        
-	        // ファイルURLにrawが含まれているか確認
-	        boolean isRaw = fileUrl.contains("/raw/upload/");
-	        String resourceType = isRaw ? "raw" : "image";
-	        
-	        // 署名付きURL生成（1時間有効）
-	        Map<String, Object> params = new java.util.HashMap<>();
-	        params.put("resource_type", resourceType);
-	        params.put("type", "upload");
-	        
-	        return cloudinary.url()
-	            .resourceType(resourceType)
-	            .type("upload")
-	            .signed(true)
-	            .generate(publicId);
-	    } catch (Exception e) {
-	        return fileUrl;
-	    }
-	}
+    private String extractPublicId(String fileUrl) {
+        String[] parts = fileUrl.split("/upload/");
+        String afterUpload = parts[1];
+        if (afterUpload.startsWith("v")) {
+            afterUpload = afterUpload.substring(afterUpload.indexOf("/") + 1);
+        }
+        int dotIndex = afterUpload.lastIndexOf(".");
+        if (dotIndex != -1) {
+            afterUpload = afterUpload.substring(0, dotIndex);
+        }
+        return afterUpload;
+    }
 }
