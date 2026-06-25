@@ -3,9 +3,7 @@
 
 <head>
 	<div th:replace="~{fragment :: meta}"></div>
-
 	<div th:replace="~{fragment :: styles}"></div>
-
 	<title>投稿作成</title>
 </head>
 
@@ -17,11 +15,16 @@
 			<div class="container">
 				<h1 class="fs-2 my-3">投稿作成</h1>
 
+				<div th:if="${errorMessage}">
+					<p class="text-danger" th:text="${errorMessage}"></p>
+				</div>
+
 				<div class="mb-2">
 					<a th:href="@{/posts}" class="text-decoration-none">&lt; 戻る</a>
 				</div>
 
-				<form th:action="@{/posts/create}" method="post" th:object="${postRegisterForm}">
+				<form th:action="@{/posts/create}" method="post" th:object="${postRegisterForm}"
+					enctype="multipart/form-data">
 					<div class="form-group mb-3">
 						<label for="title">タイトル</label>
 						<div th:if="${#fields.hasErrors('title')}" class="text-danger small mb-2" th:errors="*{title}">
@@ -35,6 +38,12 @@
 							th:errors="*{content}">
 						</div>
 						<textarea class="form-control" th:field="*{content}"></textarea>
+					</div>
+
+					<div class="form-group mb-3">
+						<label for="attachedFile">ファイル添付（任意）</label>
+						<p class="text-muted small mb-1">画像・PDF・Word・Excel・PowerPoint等（最大10MB）</p>
+						<input type="file" class="form-control" th:field="*{attachedFile}">
 					</div>
 
 					<div>

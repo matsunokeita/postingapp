@@ -25,135 +25,139 @@ import com.example.postingapp.service.PostService;
 @Controller
 @RequestMapping("/posts")
 public class PostController {
-	private final PostService postService;
+    private final PostService postService;
 
-	public PostController(PostService postService) {
-		this.postService = postService;
-	}
+    public PostController(PostService postService) {
+        this.postService = postService;
+    }
 
-	@PostMapping("/create")
-	public String create(@ModelAttribute @Validated PostRegisterForm postRegisterForm, BindingResult bindingResult,
-			@AuthenticationPrincipal UserDetailsImpl userDetailsImpl, RedirectAttributes redirectAttributes,
-			Model model) {
+    @PostMapping("/create")
+    public String create(@ModelAttribute @Validated PostRegisterForm postRegisterForm,
+            BindingResult bindingResult,
+            @AuthenticationPrincipal UserDetailsImpl userDetailsImpl,
+            RedirectAttributes redirectAttributes,
+            Model model) {
 
-		if (bindingResult.hasErrors()) {
-			model.addAttribute("postRegisterForm", postRegisterForm);
+        if (bindingResult.hasErrors()) {
+            model.addAttribute("postRegisterForm", postRegisterForm);
+            return "posts/register";
+        }
 
-			return "posts/register";
-		}
+        User user = userDetailsImpl.getUser();
 
-		User user = userDetailsImpl.getUser();
+        try {
+            postService.createPost(postRegisterForm, user);
+        } catch (RuntimeException e) {
+            model.addAttribute("postRegisterForm", postRegisterForm);
+            model.addAttribute("errorMessage", "ファイルのアップロードに失敗しました。");
+            return "posts/register";
+        }
 
-		postService.createPost(postRegisterForm, user);
-		redirectAttributes.addFlashAttribute("successMessage", "投稿が完了しました。");
+        redirectAttributes.addFlashAttribute("successMessage", "投稿が完了しました。");
+        return "redirect:/posts";
+    }
 
-		return "redirect:/posts";
-	}
+    @GetMapping
+    public String index(@AuthenticationPrincipal UserDetailsImpl userDetailsImpl, Model model) {
+        User user = userDetailsImpl.getUser();
+        List<Post> posts = postService.findPostsByUserOrderedByUpdatedAtAsc(user);
+        model.addAttribute("posts", posts);
+        return "posts/index";
+    }
 
-	@GetMapping
-	public String index(@AuthenticationPrincipal UserDetailsImpl userDetailsImpl, Model model) {
-		User user = userDetailsImpl.getUser();
-		List<Post> posts = postService.findPostsByUserOrderedByUpdatedAtAsc(user);
+    @GetMapping("/{id}")
+    public String show(@PathVariable(name = "id") Integer id,
+            RedirectAttributes redirectAttributes,
+            Model model) {
+        Optional<Post> optionalPost = postService.findPostById(id);
 
-		model.addAttribute("posts", posts);
+        if (optionalPost.isEmpty()) {
+            redirectAttributes.addFlashAttribute("errorMessage", "投稿が存在しません。");
+            return "redirect:/posts";
+        }
 
-		return "posts/index";
-	}
+        Post post = optionalPost.get();
+        model.addAttribute("post", post);
+        return "posts/show";
+    }
 
-	@GetMapping("/{id}")
-	public String show(@PathVariable(name = "id") Integer id, RedirectAttributes redirectAttributes, Model model) {
-		Optional<Post> optionalPost = postService.findPostById(id);
+    @GetMapping("/register")
+    public String register(Model model) {
+        model.addAttribute("postRegisterForm", new PostRegisterForm());
+        return "posts/register";
+    }
 
-		if (optionalPost.isEmpty()) {
-			redirectAttributes.addFlashAttribute("errorMessage", "投稿が存在しません。");
+    @GetMapping("/{id}/edit")
+    public String edit(@PathVariable(name = "id") Integer id,
+            @AuthenticationPrincipal UserDetailsImpl userDetailsImpl,
+            RedirectAttributes redirectAttributes,
+            Model model) {
+        Optional<Post> optionalPost = postService.findPostById(id);
+        User user = userDetailsImpl.getUser();
 
-			return "redirect:/posts";
-		}
+        if (optionalPost.isEmpty() || !optionalPost.get().getUser().equals(user)) {
+            redirectAttributes.addFlashAttribute("errorMessage", "不正なアクセスです。");
+            return "redirect:/posts";
+        }
 
-		Post post = optionalPost.get();
-		model.addAttribute("post", post);
+        Post post = optionalPost.get();
+        model.addAttribute("post", post);
+        model.addAttribute("postEditForm", new PostEditForm(post.getTitle(), post.getContent(), null));
+        return "posts/edit";
+    }
 
-		return "posts/show";
-	}
+    @PostMapping("/{id}/update")
+    public String update(@ModelAttribute @Validated PostEditForm postEditForm,
+            BindingResult bindingResult,
+            @PathVariable(name = "id") Integer id,
+            @AuthenticationPrincipal UserDetailsImpl userDetailsImpl,
+            RedirectAttributes redirectAttributes,
+            Model model) {
+        Optional<Post> optionalPost = postService.findPostById(id);
+        User user = userDetailsImpl.getUser();
 
-	@GetMapping("/register")
-	public String register(Model model) {
-		model.addAttribute("postRegisterForm", new PostRegisterForm());
+        if (optionalPost.isEmpty() || !optionalPost.get().getUser().equals(user)) {
+            redirectAttributes.addFlashAttribute("errorMessage", "不正なアクセスです。");
+            return "redirect:/posts";
+        }
 
-		return "posts/register";
-	}
+        Post post = optionalPost.get();
 
-	@GetMapping("/{id}/edit")
-	public String edit(@PathVariable(name = "id") Integer id,
-			@AuthenticationPrincipal UserDetailsImpl userDetailsImpl,
-			RedirectAttributes redirectAttributes,
-			Model model) {
-		Optional<Post> optionalPost = postService.findPostById(id);
-		User user = userDetailsImpl.getUser();
+        if (bindingResult.hasErrors()) {
+            model.addAttribute("post", post);
+            model.addAttribute("postEditForm", postEditForm);
+            return "posts/edit";
+        }
 
-		if (optionalPost.isEmpty() || !optionalPost.get().getUser().equals(user)) {
-			redirectAttributes.addFlashAttribute("errorMessage", "不正なアクセスです。");
+        try {
+            postService.updatePost(postEditForm, post);
+        } catch (RuntimeException e) {
+            model.addAttribute("post", post);
+            model.addAttribute("postEditForm", postEditForm);
+            model.addAttribute("errorMessage", "ファイルのアップロードに失敗しました。");
+            return "posts/edit";
+        }
 
-			return "redirect:/posts";
-		}
+        redirectAttributes.addFlashAttribute("successMessage", "投稿を編集しました。");
+        return "redirect:/posts/" + id;
+    }
 
-		Post post = optionalPost.get();
-		model.addAttribute("post", post);
-		model.addAttribute("postEditForm", new PostEditForm(post.getTitle(), post.getContent()));
+    @PostMapping("/{id}/delete")
+    public String delete(@PathVariable(name = "id") Integer id,
+            @AuthenticationPrincipal UserDetailsImpl userDetailsImpl,
+            RedirectAttributes redirectAttributes,
+            Model model) {
+        Optional<Post> optionalPost = postService.findPostById(id);
+        User user = userDetailsImpl.getUser();
 
-		return "posts/edit";
-	}
+        if (optionalPost.isEmpty() || !optionalPost.get().getUser().equals(user)) {
+            redirectAttributes.addFlashAttribute("errorMessage", "不正なアクセスです。");
+            return "redirect:/posts";
+        }
 
-	@PostMapping("/{id}/update")
-	public String update(@ModelAttribute @Validated PostEditForm postEditForm,
-			BindingResult bindingResult,
-			@PathVariable(name = "id") Integer id,
-			@AuthenticationPrincipal UserDetailsImpl userDetailsImpl,
-			RedirectAttributes redirectAttributes,
-			Model model) {
-		Optional<Post> optionalPost = postService.findPostById(id);
-		User user = userDetailsImpl.getUser();
-
-		if (optionalPost.isEmpty() || !optionalPost.get().getUser().equals(user)) {
-			redirectAttributes.addFlashAttribute("errorMessage", "不正なアクセスです。");
-
-			return "redirect:/posts";
-		}
-
-		Post post = optionalPost.get();
-
-		if (bindingResult.hasErrors()) {
-			model.addAttribute("post", post);
-			model.addAttribute("postEditForm", postEditForm);
-
-			return "posts/edit";
-		}
-
-		postService.updatePost(postEditForm, post);
-		redirectAttributes.addFlashAttribute("successMessage", "投稿を編集しました。");
-
-		return "redirect:/posts/" + id;
-	}
-
-	@PostMapping("/{id}/delete")
-	public String delete(@PathVariable(name = "id") Integer id,
-			@AuthenticationPrincipal UserDetailsImpl userDetailsImpl,
-			RedirectAttributes redirectAttributes,
-			Model model) {
-		Optional<Post> optionalPost = postService.findPostById(id);
-		User user = userDetailsImpl.getUser();
-
-		if (optionalPost.isEmpty() || !optionalPost.get().getUser().equals(user)) {
-			redirectAttributes.addFlashAttribute("errorMessage", "不正なアクセスです。");
-
-			return "redirect:/posts";
-		}
-
-		Post post = optionalPost.get();
-		postService.deletePost(post);
-		redirectAttributes.addFlashAttribute("successMessage", "投稿を削除しました。");
-
-		return "redirect:/posts";
-	}
-
+        Post post = optionalPost.get();
+        postService.deletePost(post);
+        redirectAttributes.addFlashAttribute("successMessage", "投稿を削除しました。");
+        return "redirect:/posts";
+    }
 }
