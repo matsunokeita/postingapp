@@ -31,6 +31,26 @@
 					<a th:href="@{/posts/register}" class="text-decoration-none">投稿作成</a>
 				</div>
 
+				<!-- ソートヘッダー -->
+				<div class="d-flex border-bottom pb-1 mb-2 text-muted small">
+					<div class="flex-grow-1">
+						<a th:href="@{/posts(sort='title', order=${sort == 'title' and order == 'asc' ? 'desc' : 'asc'})}"
+							class="text-decoration-none text-muted">
+							タイトル
+							<span th:if="${sort == 'title' and order == 'asc'}">▲</span>
+							<span th:if="${sort == 'title' and order == 'desc'}">▼</span>
+						</a>
+					</div>
+					<div>
+						<a th:href="@{/posts(sort='updatedAt', order=${sort == 'updatedAt' and order == 'asc' ? 'desc' : 'asc'})}"
+							class="text-decoration-none text-muted">
+							更新日時
+							<span th:if="${sort == 'updatedAt' and order == 'asc'}">▲</span>
+							<span th:if="${sort == 'updatedAt' and order == 'desc'}">▼</span>
+						</a>
+					</div>
+				</div>
+
 				<div th:unless="${#lists.isEmpty(posts)}">
 					<article th:each="post : ${posts}">
 						<div class="card mb-3">

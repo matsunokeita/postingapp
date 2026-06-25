@@ -129,4 +129,20 @@ public class PostService {
 		}
 		return afterUpload;
 	}
+
+	public List<Post> findPostsByUser(User user, String sort, String order) {
+		if ("title".equals(sort)) {
+			if ("desc".equals(order)) {
+				return postRepository.findByUserOrderByTitleDesc(user);
+			} else {
+				return postRepository.findByUserOrderByTitleAsc(user);
+			}
+		} else {
+			if ("desc".equals(order)) {
+				return postRepository.findByUserOrderByUpdatedAtDesc(user);
+			} else {
+				return postRepository.findByUserOrderByUpdatedAtAsc(user);
+			}
+		}
+	}
 }
