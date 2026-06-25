@@ -181,6 +181,11 @@ public class PostController {
 		java.net.URL url = new java.net.URL(fileUrl);
 		java.net.HttpURLConnection connection = (java.net.HttpURLConnection) url.openConnection();
 		connection.setRequestMethod("GET");
+		// Basic認証ヘッダーを追加
+		String credentials = postService.getCloudinaryCredentials();
+		String encoded = java.util.Base64.getEncoder()
+				.encodeToString(credentials.getBytes());
+		connection.setRequestProperty("Authorization", "Basic " + encoded);
 
 		response.setContentType("application/octet-stream");
 		response.setHeader("Content-Disposition", "attachment; filename=\"" + fileName + "\"");
