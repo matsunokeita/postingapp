@@ -107,7 +107,14 @@ public class PostService {
 							"public_id", publicId,
 							"resource_type", resourceType));
 
-			post.setFileUrl((String) uploadResult.get("secure_url"));
+			String secureUrl = (String) uploadResult.get("secure_url");
+
+			// rawファイル（PDF・Excel等）はダウンロード用URLに変換
+			if (!isImage) {
+				secureUrl = secureUrl.replace("/upload/", "/upload/fl_attachment/");
+			}
+
+			post.setFileUrl(secureUrl);
 			post.setFileName(originalFilename);
 
 		} catch (IOException e) {
