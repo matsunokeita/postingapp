@@ -56,9 +56,9 @@
 								style="max-height: 200px;" th:alt="${post.fileName}">
 						</div>
 
-						<a th:href="${post.fileUrl}" th:text="${post.fileName}"
-							target="_blank" class="btn btn-outline-secondary btn-sm mb-2"
-							th:download="${post.fileName}">
+						<a th:href="@{/posts/__${post.id}__/download}" th:text="${post.fileName}"
+						    target="_blank" class="btn btn-outline-secondary btn-sm mb-2">
+						</a>
 						</a>
 					</div>
 

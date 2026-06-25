@@ -109,11 +109,6 @@ public class PostService {
 
 			String secureUrl = (String) uploadResult.get("secure_url");
 
-			// rawファイル（PDF・Excel等）はダウンロード用URLに変換
-			if (!isImage) {
-				secureUrl = secureUrl.replace("/upload/", "/upload/fl_attachment/");
-			}
-
 			post.setFileUrl(secureUrl);
 			post.setFileName(originalFilename);
 
