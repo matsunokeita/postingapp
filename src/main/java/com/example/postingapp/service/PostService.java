@@ -135,4 +135,28 @@ public class PostService {
 		}
 		return afterUpload;
 	}
+	
+	public String generateSignedUrl(String fileUrl) {
+	    try {
+	        // public_idを取得
+	        String publicId = extractPublicId(fileUrl);
+	        
+	        // ファイルURLにrawが含まれているか確認
+	        boolean isRaw = fileUrl.contains("/raw/upload/");
+	        String resourceType = isRaw ? "raw" : "image";
+	        
+	        // 署名付きURL生成（1時間有効）
+	        Map<String, Object> params = new java.util.HashMap<>();
+	        params.put("resource_type", resourceType);
+	        params.put("type", "upload");
+	        
+	        return cloudinary.url()
+	            .resourceType(resourceType)
+	            .type("upload")
+	            .signed(true)
+	            .generate(publicId);
+	    } catch (Exception e) {
+	        return fileUrl;
+	    }
+	}
 }

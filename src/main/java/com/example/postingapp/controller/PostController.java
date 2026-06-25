@@ -166,31 +166,22 @@ public class PostController {
 
 	@GetMapping("/{id}/download")
 	public void download(@PathVariable(name = "id") Integer id,
-			HttpServletResponse response) throws IOException {
-		Optional<Post> optionalPost = postService.findPostById(id);
+	        HttpServletResponse response) throws IOException {
+	    Optional<Post> optionalPost = postService.findPostById(id);
 
-		if (optionalPost.isEmpty() || optionalPost.get().getFileUrl() == null) {
-			response.sendError(HttpServletResponse.SC_NOT_FOUND);
-			return;
-		}
+	    if (optionalPost.isEmpty() || optionalPost.get().getFileUrl() == null) {
+	        response.sendError(HttpServletResponse.SC_NOT_FOUND);
+	        return;
+	    }
 
-		Post post = optionalPost.get();
-		String fileUrl = post.getFileUrl();
-		String fileName = post.getFileName();
+	    Post post = optionalPost.get();
+	    String fileUrl = post.getFileUrl();
+	    String fileName = post.getFileName();
 
-		// Cloudinaryからファイルを取得
-		java.net.URL url = new java.net.URL(fileUrl);
-		java.net.HttpURLConnection connection = (java.net.HttpURLConnection) url.openConnection();
-		connection.setRequestMethod("GET");
+	    // 署名付きURLを生成してリダイレクト
+	    String signedUrl = postService.generateSignedUrl(fileUrl);
 
-		// レスポンスヘッダーを設定（強制ダウンロード）
-		response.setContentType("application/octet-stream");
-		response.setHeader("Content-Disposition", "attachment; filename=\"" + fileName + "\"");
-
-		// ファイルをストリームで転送
-		try (java.io.InputStream inputStream = connection.getInputStream();
-				java.io.OutputStream outputStream = response.getOutputStream()) {
-			inputStream.transferTo(outputStream);
-		}
+	    response.setHeader("Content-Disposition", "attachment; filename=\"" + fileName + "\"");
+	    response.sendRedirect(signedUrl);
 	}
 }
